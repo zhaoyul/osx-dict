@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- App identity -->
+    <key>CFBundleName</key>
+    <string>osx-dict</string>
+    <key>CFBundleDisplayName</key>
+    <string>osx-dict</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.zhaoyul.osx-dict</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+
+    <!-- Executable -->
+    <key>CFBundleExecutable</key>
+    <string>osx-dict</string>
+
+    <!-- Hide from Dock (menu-bar-only agent) -->
+    <key>LSUIElement</key>
+    <true/>
+
+    <!-- Minimum macOS version -->
+    <key>LSMinimumSystemVersion</key>
+    <string>11.0</string>
+
+    <!-- Privacy descriptions shown to the user in System Settings -->
+    <key>NSAccessibilityUsageDescription</key>
+    <string>osx-dict needs Accessibility access to read the word under your cursor.</string>
+
+    <key>NSAppleEventsUsageDescription</key>
+    <string>osx-dict may use Apple Events to simulate a copy keystroke when reading selected text.</string>
+</dict>
+</plist>
