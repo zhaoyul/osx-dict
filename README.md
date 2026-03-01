@@ -1,9 +1,37 @@
 # osx-dict
 
+中文 | [English](#english)
+
+---
+
+## 中文
+
+一个轻量级 macOS 菜单栏词典应用。应用使用系统内置词典（`DictionaryServices`），在任意应用中读取鼠标所在位置的英文单词（或当前选中文本），并显示翻译/释义结果。
+
+### 功能清单与完成情况
+
+- [x] 使用系统内置词典离线查询（无网络依赖）
+- [x] 支持“任意应用”取词（优先 Accessibility，失败后回退到剪贴板复制）
+- [x] 查询结果通过不抢焦点浮窗展示
+- [x] 提供全局快捷键 **⌥D** 触发查询
+- [ ] 仅靠“鼠标悬停”自动查询（当前需按 **⌥D** 触发）
+
+---
+
+## English
+
 A lightweight macOS menu-bar application that looks up the word under your
 cursor (or the text you have selected) in the built-in system dictionary and
 shows the definition in a small floating panel — without stealing focus from
 whatever you are working in.
+
+### Feature checklist & status
+
+- [x] Offline lookup with macOS built-in dictionary (`DictionaryServices`)
+- [x] Works across apps (Accessibility first, clipboard-copy fallback)
+- [x] Non-activating popup panel for definitions/translations
+- [x] Global hotkey **⌥D** to trigger lookup
+- [ ] Hover-only automatic lookup (currently requires pressing **⌥D**)
 
 ---
 
