@@ -21,12 +21,15 @@ static const NSTimeInterval kAutoDismissDelay = 8.0;
 static const CGFloat kPadding       = 12.0;
 static const CGFloat kMaxPanelWidth = 420.0;
 static const CGFloat kMinPanelWidth = 200.0;
+static const CGFloat kMaxDefinitionViewportHeight = 180.0;
 
 @interface PopupWindow ()
 @property (nonatomic, strong) NSTextView   *wordLabel;
 @property (nonatomic, strong) NSTextView   *definitionView;
+@property (nonatomic, strong) NSScrollView *definitionScrollView;
 @property (nonatomic, strong) NSTimer      *dismissTimer;
 @property (nonatomic, strong) id            clickMonitor; /* global event monitor */
+@property (nonatomic, strong) id            keyMonitor;   /* global key monitor */
 @end
 
 @implementation PopupWindow
@@ -70,7 +73,16 @@ static const CGFloat kMinPanelWidth = 200.0;
 
     /* Definition body */
     _definitionView = [self makeTextViewBold:NO fontSize:13.0];
-    [blur addSubview:_definitionView];
+    _definitionView.verticallyResizable = YES;
+    _definitionView.horizontallyResizable = NO;
+
+    _definitionScrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+    _definitionScrollView.hasVerticalScroller = YES;
+    _definitionScrollView.hasHorizontalScroller = NO;
+    _definitionScrollView.borderType = NSNoBorder;
+    _definitionScrollView.drawsBackground = NO;
+    _definitionScrollView.documentView = _definitionView;
+    [blur addSubview:_definitionScrollView];
 
     return self;
 }
@@ -83,6 +95,8 @@ static const CGFloat kMinPanelWidth = 200.0;
     tv.selectable           = YES;
     tv.drawsBackground      = NO;
     tv.textContainerInset   = NSMakeSize(0, 0);
+    tv.textContainer.widthTracksTextView = YES;
+    tv.textContainer.containerSize = NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX);
     tv.font = bold ? [NSFont boldSystemFontOfSize:size]
                    : [NSFont systemFontOfSize:size];
     tv.textColor = [NSColor labelColor];
@@ -135,9 +149,18 @@ static const CGFloat kMinPanelWidth = 200.0;
         __weak PopupWindow *weakSelf = self;
         _clickMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:
                              (NSEventMaskLeftMouseDown | NSEventMaskRightMouseDown)
-                                                               handler:^(NSEvent *event) {
+                                                                handler:^(NSEvent *event) {
             (void)event;
             [weakSelf hidePanel];
+        }];
+    }
+    if (!_keyMonitor) {
+        __weak PopupWindow *weakSelf = self;
+        _keyMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskKeyDown
+                                                              handler:^(NSEvent *event) {
+            if (event.keyCode == 53) { /* Escape */
+                [weakSelf hidePanel];
+            }
         }];
     }
 }
@@ -149,6 +172,10 @@ static const CGFloat kMinPanelWidth = 200.0;
     if (_clickMonitor) {
         [NSEvent removeMonitor:_clickMonitor];
         _clickMonitor = nil;
+    }
+    if (_keyMonitor) {
+        [NSEvent removeMonitor:_keyMonitor];
+        _keyMonitor = nil;
     }
 
     [self orderOut:nil];
@@ -165,17 +192,17 @@ static const CGFloat kMinPanelWidth = 200.0;
                         usedRectForTextContainer:_wordLabel.textContainer].size.height;
     wordH = MAX(wordH, 20);
 
-    /* Measure definition height (cap at 10 lines ≈ 130 pt) */
+    /* Measure definition full content height */
     [_definitionView setFrameSize:NSMakeSize(width, 1)];
     [_definitionView.layoutManager
         glyphRangeForTextContainer:_definitionView.textContainer];
-    CGFloat defH = [_definitionView.layoutManager
+    CGFloat defContentH = [_definitionView.layoutManager
                        usedRectForTextContainer:_definitionView.textContainer].size.height;
-    defH = MAX(defH, 20);
-    defH = MIN(defH, 130);
+    defContentH = MAX(defContentH, 20);
+    CGFloat defViewportH = MIN(defContentH, kMaxDefinitionViewportHeight);
 
     CGFloat sepH    = 1.0;
-    CGFloat totalH  = kPadding + wordH + kPadding/2 + sepH + kPadding/2 + defH + kPadding;
+    CGFloat totalH  = kPadding + wordH + kPadding/2 + sepH + kPadding/2 + defViewportH + kPadding;
     CGFloat panelW  = MAX(kMinPanelWidth, MIN(kMaxPanelWidth, width + 2 * kPadding));
 
     [self setContentSize:NSMakeSize(panelW, totalH)];
@@ -193,8 +220,9 @@ static const CGFloat kMinPanelWidth = 200.0;
         }
     }
 
-    y -= kPadding / 2 + defH;
-    _definitionView.frame = NSMakeRect(kPadding, y, width, defH);
+    y -= kPadding / 2 + defViewportH;
+    _definitionScrollView.frame = NSMakeRect(kPadding, y, width, defViewportH);
+    _definitionView.frame = NSMakeRect(0, 0, width, defContentH);
 }
 
 /* Keep the panel from becoming key even if the user clicks on it */

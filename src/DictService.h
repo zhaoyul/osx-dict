@@ -23,6 +23,20 @@ extern "C" {
 char *ds_lookup(const char *word);
 
 /*
+ * Set dictionary short-name used by ds_lookup (e.g. "Oxford Dictionary of English").
+ * Pass NULL or empty string to use system default dictionary.
+ */
+void ds_set_dictionary_name(const char *name);
+
+/*
+ * Copy available dictionary short-names from DictionaryServices.
+ * Returns a malloc'd array of malloc'd C strings and writes count to out_count.
+ * Caller must free with ds_free_dictionary_names.
+ */
+char **ds_copy_dictionary_names(int *out_count);
+void ds_free_dictionary_names(char **names, int count);
+
+/*
  * Trim `text` to the first `max_words` whitespace-separated tokens.
  * Useful for passing a short snippet to ds_lookup rather than a whole
  * paragraph.  Returns a newly malloc'd string.  Caller must free().
