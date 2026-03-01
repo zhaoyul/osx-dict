@@ -12,9 +12,13 @@
 
 - [x] 使用系统内置词典离线查询（无网络依赖）
 - [x] 支持“任意应用”取词（优先 Accessibility，失败后回退到剪贴板复制）
+- [x] 菜单栏图标菜单中可配置词典，并可选择英文词典
 - [x] 查询结果通过不抢焦点浮窗展示
+- [x] 支持按 **Esc** 关闭浮窗
+- [x] 词典内容较长时可滚动查看
 - [x] 提供全局快捷键 **⌥D** 触发查询
-- [ ] 仅靠“鼠标悬停”自动查询（当前需按 **⌥D** 触发）
+- [x] 文本场景优先取当前光标词（而不是段落首词）
+- [ ] 仅靠“鼠标悬停”自动查询（当前仍需按 **⌥D** 触发）
 
 ---
 
@@ -29,8 +33,12 @@ whatever you are working in.
 
 - [x] Offline lookup with macOS built-in dictionary (`DictionaryServices`)
 - [x] Works across apps (Accessibility first, clipboard-copy fallback)
+- [x] Dictionary is configurable from the menu-bar icon menu (English dictionaries selectable)
 - [x] Non-activating popup panel for definitions/translations
+- [x] Press **Esc** to dismiss the popup
+- [x] Long definitions are scrollable
 - [x] Global hotkey **⌥D** to trigger lookup
+- [x] Prefer current cursor word instead of paragraph-first word in text contexts
 - [ ] Hover-only automatic lookup (currently requires pressing **⌥D**)
 
 ---

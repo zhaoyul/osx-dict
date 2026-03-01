@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include <ApplicationServices/ApplicationServices.h>
 #include <Carbon/Carbon.h>
@@ -56,6 +57,35 @@ static char *trim_whitespace(char *s) {
     while (end > s && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r'))
         *end-- = '\0';
     return s;
+}
+
+static char *extract_word_at_index(const char *text, size_t idx) {
+    if (!text || *text == '\0') return NULL;
+    size_t len = strlen(text);
+    if (len == 0) return NULL;
+    if (idx >= len) idx = len - 1;
+
+    /* If cursor lands right after a word (e.g. on whitespace/punctuation),
+     * step one character back so we still capture that word. */
+    if (!isalnum((unsigned char)text[idx]) &&
+        idx > 0 &&
+        isalnum((unsigned char)text[idx - 1])) {
+        idx--;
+    }
+
+    if (!isalnum((unsigned char)text[idx])) return NULL;
+
+    size_t start = idx;
+    while (start > 0 && isalnum((unsigned char)text[start - 1])) start--;
+    size_t end = idx;
+    while (end + 1 < len && isalnum((unsigned char)text[end + 1])) end++;
+
+    size_t out_len = end - start + 1;
+    char *out = malloc(out_len + 1);
+    if (!out) return NULL;
+    memcpy(out, text + start, out_len);
+    out[out_len] = '\0';
+    return out;
 }
 
 /* -------------------------------------------------------------------------
@@ -103,8 +133,34 @@ char *tg_word_at_mouse_ax(void) {
         AXUIElementCopyAttributeValue(element, kAXValueAttribute,
                                       (CFTypeRef *)&value);
         if (value) {
-            result = cf_string_to_cstr(value);
+            char *fullText = cf_string_to_cstr(value);
             CFRelease(value);
+            if (fullText) {
+                CFTypeRef selectedRangeRef = NULL;
+                AXUIElementCopyAttributeValue(element, kAXSelectedTextRangeAttribute,
+                                              &selectedRangeRef);
+                if (selectedRangeRef &&
+                    CFGetTypeID(selectedRangeRef) == AXValueGetTypeID()) {
+                    CFRange selectedRange = CFRangeMake(0, 0);
+                    if (AXValueGetType((AXValueRef)selectedRangeRef) == kAXValueCFRangeType &&
+                        AXValueGetValue((AXValueRef)selectedRangeRef,
+                                        kAXValueCFRangeType,
+                                        &selectedRange)) {
+                        size_t idx = selectedRange.length > 0
+                                   ? (size_t)selectedRange.location
+                                   : (selectedRange.location > 0
+                                      ? (size_t)selectedRange.location - 1
+                                      : 0);
+                        result = extract_word_at_index(fullText, idx);
+                    }
+                    CFRelease(selectedRangeRef);
+                } else if (selectedRangeRef) {
+                    CFRelease(selectedRangeRef);
+                }
+
+                if (!result) result = fullText;
+                else free(fullText);
+            }
         }
     }
 
