@@ -1,0 +1,16 @@
+# Build artefacts
+build/
+
+# CodeQL internal
+_codeql_detected_source_root
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
