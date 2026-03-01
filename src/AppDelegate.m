@@ -37,7 +37,9 @@ static CGEventRef eventTapCallback(CGEventTapProxy proxy,
                          ((flags & kCGEventFlagMaskControl)   == 0);
         if (isOptionD) {
             AppDelegate *delegate = (__bridge AppDelegate *)refcon;
-            dispatch_async(dispatch_get_main_queue(), ^{
+            /* Delay slightly so modifier keys are released before clipboard fallback. */
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(120 * NSEC_PER_SEC / 1000)),
+                           dispatch_get_main_queue(), ^{
                 [delegate performLookup];
             });
             /* Consume the event so it doesn't reach the frontmost app */
